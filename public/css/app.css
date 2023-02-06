@@ -1,0 +1,48 @@
+body {
+	background: #fafafa;
+}
+
+.position-relative {
+	margin: 0px auto 30px auto;
+	position: relative;
+	height: 500px;
+	overflow: hidden;	
+}
+
+.position-relative img{
+	display: inline-block;
+	width: 100%;
+	height: auto;
+	-o-object-fit: cover;
+	   object-fit: cover;
+
+}
+
+.fst-italic{
+	position: absolute;
+	font-style: italic!important;
+	color: lightcyan;
+	top: 25%;
+	left: 20%;
+	text-align: center
+}
+
+.user-hotel-form {
+	
+    margin: auto;
+}
+
+.wrapper{
+	 padding: 12px 0;
+     border-radius: 4px;
+     background-color: #93C9EB;
+     display: block;
+}
+
+.card{
+	margin: auto;
+}
+
+.hotel{
+	margin: auto;
+}
