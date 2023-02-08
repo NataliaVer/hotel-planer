@@ -20,7 +20,7 @@ class UserHotelController extends Controller
 {
 
     public function userhotel() {
-        if (Auth::check()) {
+        // if (Auth::check()) {
             $user = Auth::user();
             $hotel = $user->hotel;
             $photos = $user->photos;
@@ -28,7 +28,7 @@ class UserHotelController extends Controller
             //dd($hotels);
             
             return view('userhotel', compact('hotel', 'photos'));
-        }
+        // }
     }
 
     public function userhotelCreate() {

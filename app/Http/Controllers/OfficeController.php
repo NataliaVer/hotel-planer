@@ -19,20 +19,20 @@ use App\Models\Photo;
 class OfficeController extends Controller
 {
     public function useroffice() {
-        if (Auth::check()) {
+        // if (Auth::check()) {
             return view('useroffice');
-        }
+        // }
     }
 
     public function userofficeEdit() {
-        if (Auth::check()) {
+        // if (Auth::check()) {
             
             return view('useredit');
-        }
+        // }
     }
 
     public function userofficeUpdate() {
-        if (Auth::check()) {
+        // if (Auth::check()) {
             $user = Auth::user();
 
             $data = request()->validate([
@@ -53,7 +53,7 @@ class OfficeController extends Controller
 
             //тут також потрібно буде додати зміну пароля
 
-        }
+        // }
     }
 
     public function userofficecheckPassword(Request $request) {
