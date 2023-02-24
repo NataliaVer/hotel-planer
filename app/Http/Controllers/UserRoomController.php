@@ -138,8 +138,8 @@ class UserRoomController extends Controller
                     'kind_photo' => 'room_photos'];
 
 
-            $photos = $room->photos;
-            foreach ($photos as $photo) {
+            $photos_base = $room->photos;
+            foreach ($photos_base as $photo) {
 
                 if (File::exists(mb_substr($photo->photo,1))) {
                         unlink(public_path($photo->photo));
