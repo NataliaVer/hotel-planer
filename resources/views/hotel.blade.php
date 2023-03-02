@@ -32,7 +32,7 @@
 </div>
 </div>
 
-<div class="container pt-3">
+<div class="container pt-3 col-md-7">
 
   <div class="card text-center">
   <div class="card-header">
@@ -51,8 +51,25 @@
 
 </div>
 
+<form method="post">
+	@csrf
+<div class="container alert alert-info col-md-8 my-3" role="alert">
+<div class="input-group">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="">Оберіть дати проживання, щоб переглянути ціни і номери:</span>
+  </div>
+  <input type="hidden" name="hotel_id" id="hotel_id" class="hidden_hotel_id" value="{{ $hotel->id }}">
+  <input type="date" class="form-control" id="dateFromHome" min="{{ date('Y-m-d') }}" value="{{$dateFrom}}">
+  <input type="date" class="form-control" id="dateToHome" min="{{ date('Y-m-d', strtotime('+1 day')) }}" value="{{$dateTo}}">
+</div>
+</div>
+</form>
+
+<?php $count_days = date_diff(new DateTime($dateFrom), new DateTime($dateTo))->d ?>
+
 <div class="container">
 	<h6 style="text-align: center">Ціни, номери</h6>
+  <div class="room-cards" id="room-cards">
 	@foreach($rooms as $room)
   @if($room->count_rooms-$room->booked_rooms_count>0)
 	<div class="card mb-3" style="max-width: 540px;">
@@ -69,7 +86,7 @@
         <h5 class="card-title">{{ $room->name }}</h5>
         <p class="card-text">{{ $room->description }}</p>
         <p class="card-text"><small class="text-muted">Зручності в номері: {{ $room->amenities }}</small></p>
-        <p class="card-text">Ціна:{{ $room->price }}</p>
+        <p class="card-text">Ціна: {{ $room->price * $count_days }} за {{$count_days." ".(substr($count_days,-1)==1&&$count_days!=11?"ніч":(in_array(substr($count_days,-1),[5,6,7,8,9])||($count_days>4&&$count_days<21)?"ночей":"ночі"))}}</p>
         <p class="card-text">Кількість спальних місць:{{ $room->count_one_bed }}</p>
         <button class="btn btn-primary openBookModal" type="button" data-id="{{ $room->id }}">Забронювати</button>
       </div>
@@ -78,5 +95,6 @@
 </div>
 @endif
 @endforeach
+</div>
 </div>
 @endsection

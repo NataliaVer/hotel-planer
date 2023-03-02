@@ -65,7 +65,7 @@ class HotelController extends Controller
                                    ->get();
         
         //dd($rooms);
-        return view('hotel', compact('hotel', 'rooms', 'photos'));
+        return view('hotel', compact('hotel', 'rooms', 'photos', 'dateFrom', 'dateTo'));
 
     }
 }

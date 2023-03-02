@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\BookedRoom;
 use App\Models\Room;
+use App\Models\Hotel;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -88,6 +89,8 @@ class UserBookedRoomController extends Controller
         return $response;
     }
 
+    //список доступних кімнат аутентифікованого користувача
+    //на період
     public function allUserRoomToDate(Request $req) {
         $id = $req->get('id');
         $dateFrom = $req->get('dateFrom');
@@ -105,24 +108,32 @@ class UserBookedRoomController extends Controller
 
         $rooms = $user->rooms->pluck('id')->toArray();
 
-        //від загальної кількості кімнат певного виду відняти уже заброньовані кімнати
-        //без тієї що змінюємо (один запит на Add та Edit), якщо її id передано в запиті
+        $booked_rooms = $this->freeRoomsOnDateTable($rooms, $id, $dateFrom, $dateTo);
 
-        $booked_rooms = DB::table('booked_rooms')->select(DB::raw('count(*) as booked_rooms_count, room_id'))
+        $roomsAvailable = DB::table('rooms')->where('user_id','=', $user->id)
+                                    ->leftJoinSub($booked_rooms, 'booked_rooms', function ($join) {
+                                        $join->on('rooms.id', '=', 'booked_rooms.room_id');
+                                    })
+                                    ->get();
+
+        //вибрати вільні кімнати на дати
+
+        // dd($roomsAvailable);
+
+        $response['status'] = true;
+        $response['rooms'] = $roomsAvailable;
+
+        return $response;
+    }
+
+    //від загальної кількості кімнат певного виду відняти уже заброньовані кімнати
+    //без тієї що змінюємо (один запит на Add та Edit), якщо її id передано в запиті
+    //тут думаю, запит краще буде відправити в модель
+    public function freeRoomsOnDateTable($rooms, $id, $dateFrom, $dateTo) {
+        return  DB::table('booked_rooms')->select(DB::raw('count(*) as booked_rooms_count, room_id'))
                                                 ->whereIn('room_id', $rooms)
                                                 ->where('id', "<>", ($id ? $id : ""))
                                                 ->where('confirmed', '1')
-                                                // ->where('date_from', '>', $dateFrom) //$dateTo
-                                                // ->where('date_from', '<', $dateTo)
-                                                // ->orWhere(function($query) use ($dateFrom, $dateTo) {
-                                                //    $query->where('date_to', '>', $dateFrom)
-                                                //          ->Where('date_to', '<', $dateTo);
-                                                //    })
-                                                // ->orWhere(function($query) use ($dateFrom, $dateTo) {
-                                                //    $query->where('date_from', '<=', $dateFrom)
-                                                //          ->Where('date_to', '>=', $dateTo);
-                                                //    })
-                                                // ->groupBy('room_id');
                                                 ->where(function($query) use ($dateFrom, $dateTo) {
                                                    $query->where('date_from', '>', $dateFrom)
                                                          ->where('date_from', '<', $dateTo)
@@ -136,24 +147,6 @@ class UserBookedRoomController extends Controller
                                                            });
                                                   })
                                                 ->groupBy('room_id');
-                                                //->get();
-        //BookedRoom::whereIn('room_id', $rooms)->where('confirmed', '0')->get();
-
-        $roomsAvailable = DB::table('rooms')->where('user_id','=', $user->id)
-                                    ->leftJoinSub($booked_rooms, 'booked_rooms', function ($join) {
-                                        $join->on('rooms.id', '=', 'booked_rooms.room_id');
-                                    })
-                                    // ->where('booked_rooms_count', '>', 'count_rooms')
-                                    ->get();
-
-        //вибрати вільні кімнати на дати
-
-        // dd($roomsAvailable);
-
-        $response['status'] = true;
-        $response['rooms'] = $roomsAvailable;
-
-        return $response;
     }
 
     public function dataOfBookedRoom ($id) {
@@ -196,7 +189,9 @@ class UserBookedRoomController extends Controller
                 'phone.required' => 'Укажіть телефон',
                 'phone.min' => 'Довжина поля телефону не менше 10 символів',
                 'phone.max' => 'Довжина поля телефону не більше 14 символів',
-                'email.required' => 'Укажіть електронну ардесу']);
+                'email.required' => 'Укажіть електронну ардесу',
+                'email.email' => 'Укажіть корректний формат email'
+            ]);
 
         if($data->fails()){
             $response['status'] = false;
@@ -297,5 +292,45 @@ class UserBookedRoomController extends Controller
         return $response;
         }
 
+    }
+
+    //доступність кімнат на дату для неавторизованого користувача
+    //тут краще буде перенести в інший контролер (ще подумаю)
+    public function allFreeRoomsInHotelToDate (Request $req) {
+        $hotel_id = $req->get('id');
+        $dateFrom = $req->get('dateFrom');
+        $dateTo = $req->get('dateTo');
+
+        $hotel = Hotel::find($hotel_id);
+
+        $newBookedRoom = new BookedRoom();
+
+        if (!$dateFrom || !$dateTo || !is_numeric($hotel_id) || !$newBookedRoom->validateDate($dateFrom, 'Y-m-d') || !$newBookedRoom->validateDate($dateTo, 'Y-m-d') || !$hotel) {
+            $response['status'] = false;
+            $response['message'] = "Не корректні дані, будь-ласка, перевірте дату та готель";
+
+            return $response;
+        }
+
+        $rooms = $hotel->rooms->pluck('id')->toArray();
+
+        $booked_rooms = $this->freeRoomsOnDateTable($rooms, "", $dateFrom, $dateTo);
+
+        $roomsAvailable = DB::table('rooms')->where('rooms.hotel_id','=', $hotel_id)
+                                    ->leftJoin('photos', 'rooms.id', '=', 'photos.room_id')
+                                    ->leftJoinSub($booked_rooms, 'booked_rooms', function ($join) {
+                                        $join->on('rooms.id', '=', 'booked_rooms.room_id');
+                                    })
+                                    ->where('booked_rooms.booked_rooms_count')
+                                    ->orWhereColumn('booked_rooms.booked_rooms_count', '<', 'rooms.count_rooms')
+                                    ->select('rooms.*', 'booked_rooms.booked_rooms_count', 'photos.photo')
+                                    ->get();
+
+        $response['status'] = true;
+        $response['rooms'] = $roomsAvailable;
+
+        // dd($roomsAvailable);
+                            
+        return $response;
     }
 }

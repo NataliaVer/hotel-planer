@@ -21,11 +21,11 @@
     </div>
     <div class="form-group col-md-2">
         <label for="dateFromHome">Дата з</label>
-        <input type="date" class="form-control" id="dateFromHome">
+        <input type="date" class="form-control" id="dateFromHome" min="{{ date('Y-m-d') }}">
     </div>
     <div class="form-group col-md-2">
         <label for="dateToHome">Дата до</label>
-        <input type="date" class="form-control" id="dateToHome">
+        <input type="date" class="form-control" id="dateToHome" min="{{ date('Y-m-d', strtotime('+1 day')) }}">
     </div>
     <div class="form-group col-md-2" style="display: none;">
         <label for="count">Дорослих</label>

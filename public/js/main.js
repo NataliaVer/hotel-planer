@@ -142,9 +142,11 @@ $(document).on('click', '.openBookModal', function (event) {
     //при зміні дати, щоб не було можливості бронювати зайву кількість
 
 	const room_id = $(this).data('id');
-	const locationParametr = $(location).prop('pathname').split('/');
-	const dateTo = locationParametr.pop();
-	const dateFrom = locationParametr.pop();
+	// const locationParametr = $(location).prop('pathname').split('/');
+	// const dateTo = locationParametr.pop();
+    // const dateFrom = locationParametr.pop();
+    const dateTo = $('#dateToHome').val();
+	const dateFrom = $('#dateFromHome').val();
 	console.log(room_id);
 
 	if(room_id != undefined) {
@@ -851,16 +853,81 @@ $(document).on('click', '#updatePassword', function (event) {
 $(document).on('change', '#dateToHome', function (event) {
     let dateFrom = moment.utc($('#dateFromHome').val());
     let dateTo = moment.utc($('#dateToHome').val());
-    console.log(dateFrom+'_'+dateTo);
-    if (dateFrom > dateTo) {
+    // console.log(dateFrom+'_'+dateTo);
+    if (dateFrom >= dateTo) {
         $('#dateFromHome').val(dateTo.subtract(1, 'days').format("YYYY-MM-DD"));
     }
+
+    const nights = Math.ceil(dateTo-dateFrom) / (1000 * 3600 * 24);
+
+    if (location.pathname.length > 6) {
+        //створити функцію, яка буде перезаповнювати список кімнат
+
+        const allRoomCards = document.getElementById('room-cards');
+
+        while(allRoomCards.firstChild) {
+            allRoomCards.removeChild(allRoomCards.firstChild);
+        }
+
+        const id = $('#hotel_id').val();
+        const token = $("input[name='_token']").val();
+        $.ajax({
+            url: '/getAllFreeRoomsToDate',
+            type: 'GET',
+            data: {
+                _token: token,
+                id: id,
+                dateFrom: $('#dateFromHome').val(),
+                dateTo: $('#dateToHome').val()
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data.status) {
+                //   reportAnErrorForModalWindow(data.message, 'alert-danget-for-change-password');
+                data.rooms.forEach((room) => {
+                    // console.log(room);
+                    let newDiv = document.createElement("div");
+                    newDiv.classList.add('card');
+                    newDiv.classList.add('mb-3');
+                    newDiv.setAttribute('style', 'max-width: 540px;');
+
+                    newDiv.innerHTML = '<div class="row g-0">'+
+                  '<div class="col-md-4">'+
+                    '<img src="'+room.photo+'" class="img-fluid rounded-start" id="photo_room_'+room.id+'" alt="'+room.id+'">'+
+                  '</div>'+
+                  '<div class="col-md-8">'+
+                    '<div class="card-body">'+
+                      '<h5 class="card-title">'+room.name+'</h5>'+
+                      '<p class="card-text">'+room.description+'</p>'+
+                      '<p class="card-text"><small class="text-muted">Зручності в номері: '+room.amenities+'</small></p>'+
+                      '<p class="card-text">Ціна: '+room.price*nights+' за '+nights + ' ' + createLabel(nights, ['ніч', 'ночі', 'ночей'])+'</p>'+
+                      '<p class="card-text">Кількість спальних місць:'+(room.count_one_bed != null?room.count_one_bed:room.count_two_bed)+'</p>'+
+                      '<button class="btn btn-primary openBookModal" type="button" data-id="'+room.id+'">Забронювати</button>'+
+                    '</div>'+
+                  '</div>';
+
+                allRoomCards.appendChild(newDiv);
+                })
+              } else {
+                //   location.reload();
+              }
+            },
+            error: function(request, status, errorT) {
+               console.log(errorT);
+             }
+        });
+    }
 })
+
+function createLabel(number, titles) {
+    const cases = [2, 0, 1, 1, 1, 2];
+    return `${titles[number % 100 > 4 && number % 100 < 20 ? 2 : cases[number % 10 < 5 ? number % 10 : 5]]}`;
+}
 
 $(document).on('change', '#dateFromHome', function (event) {
     let dateFrom = moment.utc($('#dateFromHome').val());
     let dateTo = moment.utc($('#dateToHome').val());
-    if (dateFrom > dateTo) {
+    if (dateFrom >= dateTo) {
         $('#dateToHome').val(dateFrom.add(1, 'days').format("YYYY-MM-DD"));
     }
 })

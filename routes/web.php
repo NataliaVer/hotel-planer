@@ -70,3 +70,5 @@ Route::post('/addNewReservation', 'App\Http\Controllers\UserBookedRoomController
 Route::post('/editNewReservation', 'App\Http\Controllers\UserBookedRoomController@editNewReservation')->middleware('auth');
 
 Route::get('/api', 'App\Http\Controllers\HomeController@apiDocument')->name('apiDocument');
+
+Route::get('/getAllFreeRoomsToDate', 'App\Http\Controllers\UserBookedRoomController@allFreeRoomsInHotelToDate');
