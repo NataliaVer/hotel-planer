@@ -16,6 +16,9 @@ use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\Photo;
 
+use App\Http\Requests\UserHotelStoreRequest;
+use App\Http\Requests\UserHotelUpdateRequest;
+
 class UserHotelController extends Controller
 {
 
@@ -35,45 +38,15 @@ class UserHotelController extends Controller
         return view('uploaduserhotel');
     }
 
-    public function userhotelStore() {
+    public function userhotelStore(UserHotelStoreRequest $request) {
         $user = Auth::user();
 
-        $data = request()->validate([
-            'hotel_name' => 'required',
-            'country' => 'bail|required|max:50',
-            'city' => 'required',
-            'settlement' => 'required',
-            'street' => 'required',
-            'number_house' => 'required',
-            'phone' => 'bail|required|min:10|max:14',
-            'aditional_services' => 'required',
-            'description' => 'required',
-            'time_of_settlement' => 'required',
-            'time_of_eviction' => 'required',
-            'baground_photo' => 'required',
-            'all_photos' => ''
-            ],
-            ['hotel_name.required' => 'Заповніть назву готелю',
-             'country.required' => 'Укажіть країну',
-             'country.max' => 'Назва країни не повинна перевищувати 50 символів',
-             'city.required' => 'Укажіть місто',
-             'settlement.required' => "Укажіть населений пункт",
-             'street.required' => 'Заповніть вулицю',
-             'number_house.required' => 'Укажіть номер будинку',
-             'phone.required' => 'Укажіть номер телефону',
-             'phone.min' => 'Довжина поля телефону не менше 10 символів',
-             'phone.max' => 'Довжина поля телефону не більше 14 символів',
-             'aditional_services.required' => 'Заповніть додаткові послуги, наприклад: wi-fi, кафе, бар, басейн',
-             'description.required' => 'Додайте опис свого готелю',
-             'time_of_settlement.required' => 'Укажіть час заселення до готелю (якщо не має регламентованого, то укажіть 00:00)',
-             'time_of_eviction.required' => 'Укажіть час виселення з готелю (якщо не має регламентованого, то укажіть 00:00)',
-             'baground_photo.required' => 'Додайте фото вашого готелю'
-         ]);
+        $data = $request->validated();
 
         $hotel = $user->hotel()->create($data);
         $hotel->fresh();
 
-        if(request()->hasFile('baground_photo')) {
+        if($request->hasFile('baground_photo')) {
             // dd($data);
             // die();
             $photoData = [
@@ -81,15 +54,15 @@ class UserHotelController extends Controller
                 'hotel_id' => $hotel->id,
                 'photo' => '',
                 'kind_photo' => 'baground_photo'];
-            $fileName = time().request()->file('baground_photo')->hashName();
-            $path = request()->file('baground_photo')->storeAs('images', $fileName, 'public');
+            $fileName = time().$request->file('baground_photo')->hashName();
+            $path = $request->file('baground_photo')->storeAs('images', $fileName, 'public');
             $photoData['photo'] = '/storage/'.$path;
             Photo::create($photoData);
         }
 
-        if(request()->hasFile('all_photos')) {
-            $photos = request()->all_photos;
-            // dd(request()->all_photos[0]);
+        if($request->hasFile('all_photos')) {
+            $photos = $request->all_photos;
+            // dd($request->all_photos[0]);
             $photoData = [
                     'user_id' => $user->id,
                     'hotel_id' => $hotel->id,
@@ -115,44 +88,15 @@ class UserHotelController extends Controller
         return view('edituserhotel', compact('hotel'));
     }
 
-    public function userhotelUpdate(Hotel $hotel) {
+    public function userhotelUpdate(UserHotelUpdateRequest $request, Hotel $hotel) {
 
         $user = Auth::user();
 
-        $data = request()->validate([
-            'hotel_name' => 'required',
-            'country' => 'bail|required|max:50',
-            'city' => 'required',
-            'settlement' => 'required',
-            'street' => 'required',
-            'number_house' => 'required',
-            'phone' => 'bail|required|min:10|max:14',
-            'aditional_services' => 'required',
-            'description' => 'required',
-            'time_of_settlement' => 'required',
-            'time_of_eviction' => 'required',
-            'baground_photo' => '',
-            'all_photos' => ''
-            ],
-            ['hotel_name.required' => 'Заповніть назву готелю',
-             'country.required' => 'Укажіть країну',
-             'country.max' => 'Назва країни не повинна перевищувати 50 символів',
-             'city.required' => 'Укажіть місто',
-             'settlement.required' => "Укажіть населений пункт",
-             'street.required' => 'Заповніть вулицю',
-             'number_house.required' => 'Укажіть номер будинку',
-             'phone.required' => 'Укажіть номер телефону',
-             'phone.min' => 'Довжина поля телефону не менше 10 символів',
-             'phone.max' => 'Довжина поля телефону не більше 14 символів',
-             'aditional_services.required' => 'Заповніть додаткові послуги, наприклад: wi-fi, кафе, бар, басейн',
-             'description.required' => 'Додайте опис свого готелю',
-             'time_of_settlement.required' => 'Укажіть час заселення до готелю (якщо не має регламентованого, то укажіть 00:00)',
-             'time_of_eviction.required' => 'Укажіть час виселення з готелю (якщо не має регламентованого, то укажіть 00:00)'
-         ]);
+        $data = $request->validated();
 
         $hotel->update($data);
 
-        if(request()->hasFile('baground_photo')) {
+        if($request->hasFile('baground_photo')) {
             // dd($data);
             // die();
             $photoData = [
@@ -160,8 +104,8 @@ class UserHotelController extends Controller
                 'hotel_id' => $hotel->id,
                 'photo' => '',
                 'kind_photo' => 'baground_photo'];
-            $fileName = time().request()->file('baground_photo')->hashName();
-            $path = request()->file('baground_photo')->storeAs('images', $fileName, 'public');
+            $fileName = time().$request->file('baground_photo')->hashName();
+            $path = $request->file('baground_photo')->storeAs('images', $fileName, 'public');
             $photoData['photo'] = '/storage/'.$path;
 
             $photo = $user->photos()->where('kind_photo', 'baground_photo')->first();
@@ -175,10 +119,10 @@ class UserHotelController extends Controller
                 Photo::create($photoData);
             }
         }
-        if(request()->hasFile('all_photos')) {
+        if($request->hasFile('all_photos')) {
             // $uploadPhoto = [];
-            $photos = request()->all_photos;
-            // dd(request()->all_photos[0]);
+            $photos = $request->all_photos;
+            // dd($request->all_photos[0]);
             $photoData = [
                     'user_id' => $user->id,
                     'hotel_id' => $hotel->id,

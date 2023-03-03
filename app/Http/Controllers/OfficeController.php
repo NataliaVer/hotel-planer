@@ -16,48 +16,34 @@ use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\Photo;
 
+use App\Http\Requests\userofficeUpdateRequest;
+
 class OfficeController extends Controller
 {
     public function useroffice() {
-        // if (Auth::check()) {
+
             return view('useroffice');
-        // }
+
     }
 
     public function userofficeEdit() {
-        // if (Auth::check()) {
             
             return view('useredit');
-        // }
     }
 
-    public function userofficeUpdate() {
-        // if (Auth::check()) {
+    public function userofficeUpdate(userofficeUpdateRequest $request) {
+
             $user = Auth::user();
 
-            $data = request()->validate([
-                'phone' => 'bail|required|min:10|max:14',
-                'email' => 'bail|required|email'
-            ],
-            [
-                'phone.required' => 'Укажіть телефон',
-                'phone.min' => 'Довжина поля телефону не менше 10 символів',
-                'phone.max' => 'Довжина поля телефону не більше 14 символів',
-                'email.required' => 'Укажіть електронну ардесу',
-                'email.email' => 'Введіть корректну електронну адресу'
-            ]);
+            $data = $request->validated();
 
             $user->update($data);
 
             return redirect()->route('useroffice');
 
-            //тут також потрібно буде додати зміну пароля
-
-        // }
     }
 
     public function userofficecheckPassword(Request $request) {
-        // $pass = $request->post('password');
 
         if (! Hash::check($request->password, $request->user()->password)) {
             $response['status'] = false;

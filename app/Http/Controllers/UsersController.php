@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreUserRequest;
 
 use App\Models\User;
 
@@ -17,28 +18,11 @@ class UsersController extends Controller
         return view('submit');
     }
 
-    public function create(Request $request) {
+    public function create(StoreUserRequest $request) {
 
         // dd($request->name);
 
-        $validated = $request->validate([
-            'name' => 'required|min:3',
-            'phone' => 'bail|required|min:10|max:14',
-            'email' => 'bail|required|email',
-            'password' => 'required|confirmed',
-            'password_confirmation' => ''
-        ],
-        [
-            'name.required' => "Заповніть ім'я",
-            'name.min' => "Ім'я повинно мати не менше 3 символів",
-            'phone.required' => 'Укажіть телефон',
-            'phone.min' => 'Телефон повинен мати не менше 10 символів',
-            'phone.max' => 'Телефон повинен мати не більше 14 символів',
-            'email.required' => 'Заповніть поле для електронної адреси',
-            'email.email' => 'Не правильний формат електронної адреси',
-            'password.required' => 'Укажіть пароль',
-            'password.confirmed' => 'Паролі не збігаються'
-        ]);
+        $validated = $request->validated();
 
         User::create([
             'name'          => $request->name,

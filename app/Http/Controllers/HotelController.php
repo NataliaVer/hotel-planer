@@ -36,27 +36,8 @@ class HotelController extends Controller
                                                                  ->Where('date_to', '>=', $dateTo);
                                                            });
                                                   })
-                                                 // ->where('date_from', '>', $dateFrom) //$dateTo
-                                                 // ->Where('date_from', '<', $dateTo)
-                                                 // ->orWhere(function($query) use ($dateFrom, $dateTo) {
-                                                 //    $query->where('date_to', '>', $dateFrom)
-                                                 //          ->Where('date_to', '<', $dateTo);
-                                                 //    })
-                                                 // ->orWhere(function($query) use ($dateFrom, $dateTo) {
-                                                 //    $query->where('date_from', '<=', $dateFrom)
-                                                 //          ->Where('date_to', '>=', $dateTo);
-                                                 //    })
                                                  ->groupBy('room_id');
 
-                                                 // ->whereBetween('date_from', [$dateFrom, $dateTo])
-                                                 // ->orwhereBetween('date_to', [$dateFrom, $dateTo])
-
-                                                 // ->where('date_from', '>=', $dateFrom) //$dateTo
-                                                 // ->Where('date_from', '<', $dateTo)
-                                                 // ->orWhere(function($query) use ($dateFrom, $dateTo) {
-                                                 //    $query->where('date_to', '>', $dateFrom)
-                                                 //          ->Where('date_to', '<=', $dateTo);
-                                                 //    })
 
         $rooms = DB::table('rooms')->where('hotel_id','=', $hotel->id)
                                     ->leftJoinSub($booked_rooms, 'booked_rooms', function ($join) {

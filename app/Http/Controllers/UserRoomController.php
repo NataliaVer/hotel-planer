@@ -16,6 +16,9 @@ use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\Photo;
 
+use App\Http\Requests\UserRoomStoreRequest;
+use App\Http\Requests\UserRoomUpdateRequest;
+
 class UserRoomController extends Controller
 {
 
@@ -39,28 +42,11 @@ class UserRoomController extends Controller
         return view('uploaduserrooms', compact('hotel'));
     }
 
-    public function userroomStore() {
+    public function userroomStore(UserRoomStoreRequest $request) {
         $user = Auth::user();
         $hotel = $user->hotel;
 
-        $data = request()->validate([
-            'name' => 'required|max:150',
-            'price' => 'required',
-            'description' => 'required',
-            'amenities' => '',
-            'count_one_bed' => '',
-            'count_two_bed' => '',
-            'count_rooms' => 'required',
-            'room_photos' => 'required',
-            'hotel_id' => ''
-            ],
-            ['name.required' => 'Заповніть назву кімнати (Одномісний номер, Двомісний люкс і т.і.)',
-             'name.max' => 'Занадто багато символів',
-             'price.required' => 'Укажіть ціну',
-             'description.required' => 'Укажіть ціну',
-             'count_rooms.required' => 'Укажіть кількість кімнат даного виду в готелі',
-             'room_photos.required' => 'Додайте фото для кімнати'
-         ]);
+        $data = $request->validated();
 
         $room = new Room($data);
         //dd($room);
@@ -69,8 +55,8 @@ class UserRoomController extends Controller
 
         $room->fresh();
 
-        if(request()->hasFile('room_photos')) {
-            $photos = request()->room_photos;
+        if($request->hasFile('room_photos')) {
+            $photos = $request->room_photos;
             $photoData = [
                     'user_id' => $user->id,
                     'room_id' => $room->id,
@@ -102,34 +88,19 @@ class UserRoomController extends Controller
 
     }
 
-    public function userroomUpdate(Room $room) {
+    public function userroomUpdate(UserRoomUpdateRequest $request, Room $room) {
 
         $user = Auth::user();
         $hotel = $user->hotel;
 
-        $data = request()->validate([
-            'name' => 'required',
-            'price' => 'required',
-            'description' => 'required',
-            'amenities' => 'required',
-            'count_one_bed' => '',
-            'count_two_bed' => '',
-            'count_rooms' => 'required',
-            'room_photos' => ''
-            ],
-            ['name.required' => 'Заповніть назву кімнати (Одномісний номер, Двомісний люкс і т.і.)',
-             'name.max' => 'Занадто багато символів',
-             'price.required' => 'Укажіть ціну',
-             'description.required' => 'Укажіть ціну',
-             'count_rooms.required' => 'Укажіть кількість кімнат даного виду в готелі'
-         ]);
+        $data = $request->validated();
 
         //dd($data);
 
         $room->update($data);
 
-            if(request()->hasFile('room_photos')) {
-            $photos = request()->room_photos;
+            if($request->hasFile('room_photos')) {
+            $photos = $request->room_photos;
             $photoData = [
                     'user_id' => $user->id,
                     'room_id' => $room->id,
