@@ -7,38 +7,10 @@
 @csrf
 <div class="container col-sm-5 py-1">
   <h3>Форма реєстрації</h3>
-	
-        
-        	<!-- <div class="col">
-        		<label for="firstName" class="form-label">Тип користувача: </label>
-        	    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked>
-                    <label class="btn btn-outline-info" for="btnradio1">Гість</label>
-
-                    <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
-                    <label class="btn btn-outline-info" for="btnradio2">Готель</label>
-        	    </div>
-            </div> -->
-        
-            <!-- <div class="form-group">
-              <label for="firstName" class="form-label">Ім'я</label>
-              <input type="text" class="form-control" id="firstName" placeholder="" value="" required="">
-              <div class="invalid-feedback">
-                Потрібно вказати дійсне ім’я.
-              </div>
-            </div> -->
-
-            <!-- <div class="form-group">
-              <label for="lastName" class="form-label">Прізвище</label>
-              <input type="text" class="form-control" id="lastName" placeholder="" value="" required="">
-              <div class="invalid-feedback">
-                Потрібно вказати дійсне прізвище.
-              </div>
-            </div> -->
 
             <div class="form-group">
               <label for="name" class="form-label">Ваше ім'я</label>
-              <input name="name" type="text" class="form-control" id="name">
+              <input name="name" type="text" class="form-control" id="name" value="{{ old('name') }}">
               <div class="invalid-feedback">
                 Потрібно вказати дійсне ім'я.
               </div>
@@ -54,7 +26,7 @@
 
             <div class="form-group">
               <label for="email" class="form-label">E-mail</label>
-              <input name="email" type="email" class="form-control" id="user-email" placeholder="you@example.com">
+              <input name="email" type="email" class="form-control" id="user-email" placeholder="you@example.com" value="{{ old('email') }}">
               <div class="invalid-feedback">
                 Введіть корректний email.
               </div>
@@ -75,22 +47,6 @@
                 Паролі не співпадають.
               </div>
             </div>
-
-            <!-- <div class="form-group">
-              <label for="srteet" class="form-label">Вулиця</label>
-              <input type="text" class="form-control" id="srteet" placeholder="" value="" required="">
-              <div class="invalid-feedback">
-                Потрібно вказати вулицю.
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="numberHouse" class="form-label">Буд.</label>
-              <input type="text" class="form-control" id="numberHouse" placeholder="" value="" required="">
-              <div class="invalid-feedback">
-                Потрібно вказати номер будинку.
-              </div>
-            </div> -->
 
             <button class="btn btn-primary m-2" type="submit">Зберегти</button>
 

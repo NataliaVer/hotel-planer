@@ -27,7 +27,7 @@ class StoreUserRequest extends FormRequest
             'name' => 'required|min:3',
             'phone' => 'bail|required|min:10|max:14',
             'email' => 'bail|required|email',
-            'password' => 'required|confirmed',
+            'password' => ['required','min:6','confirmed','regex:/[a-z]/','regex:/[0-9]/'],
             'password_confirmation' => ''
         ];
     }
@@ -43,6 +43,8 @@ class StoreUserRequest extends FormRequest
                 'email.required' => 'Заповніть поле для електронної адреси',
                 'email.email' => 'Не правильний формат електронної адреси',
                 'password.required' => 'Укажіть пароль',
+                'password.min' => 'Пароль повинен включати мінімум 6 символів',
+                'password.regex' => 'Пароль повинен включати хоча б одну літеру та цифру',
                 'password.confirmed' => 'Паролі не збігаються'
             ];
     }
